@@ -1,0 +1,96 @@
+Из папки проекта:
+cd "C:\Users\Константин Хотеев\Desktop\MVP v1.0\level4_trainer_bot"
+
+Активировать окружение
+.\.venv\Scripts\Activate.ps1
+
+Команда импорта грамматики из Google Sheets:
+python scripts/import_grammar.py
+python scripts/import_questions.py
+python scripts/preload_question_audio.py
+
+Перед импортом можно проверить подключение и заголовки:
+python scripts/check_google_sheets.py
+
+Полный безопасный мини-набор команд:
+cd "C:\Users\Константин Хотеев\Desktop\MVP v1.0\level4_trainer_bot"
+python scripts/check_google_sheets.py
+python scripts/import_grammar.py
+
+
+    Проверить Python:
+        python --version
+
+    Запустить бота
+        python run.py
+
+    Остановить бота:
+        Ctrl + C
+
+Проверки перед запуском:
+
+    Компиляция всего проекта:
+        python -m compileall .
+
+    Инициализация / применение миграций БД:
+        python scripts/init_db.py
+
+    Smoke check:
+        python scripts/smoke_check.py
+
+    Полный базовый набор:
+        python -m compileall .
+        python scripts/init_db.py
+        python scripts/smoke_check.py
+
+ Сделать чистый ZIP проекта
+$src = (Get-Location).Path
+$dst = Join-Path $env:TEMP "level4_trainer_bot_current_clean"
+$out = "C:\Users\Константин Хотеев\Desktop\MVP v1.0\level4_trainer_bot_CURRENT_CLEAN.zip"
+
+Remove-Item $dst -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item $out -Force -ErrorAction SilentlyContinue
+
+New-Item -ItemType Directory -Path $dst | Out-Null
+
+robocopy $src $dst /E `
+  /XD ".venv" "venv" "__pycache__" ".git" ".mypy_cache" ".pytest_cache" "secrets" "backups" `
+  /XF ".env" "*.db" "*.sqlite" "*.sqlite3" "*.pyc" "*.pyo" "*.log" "*.zip" "google_service_account.json"
+
+Compress-Archive -Path "$dst\*" -DestinationPath $out -Force
+
+Remove-Item $dst -Recurse -Force
+
+Write-Host "Created: $out"
+
+
+Самый полезный ежедневный набор
+
+Когда тестируешь после правок Cursor:
+
+cd "C:\Users\Константин Хотеев\Desktop\MVP v1.0\level4_trainer_bot"
+python -m compileall .
+python scripts/init_db.py
+python scripts/smoke_check.py
+python scripts/check_google_sheets.py
+python scripts/import_grammar.py
+python run.py
+
+$src = (Get-Location).Path
+$dst = Join-Path $env:TEMP "level4_trainer_bot_v0.1-questions-audio-cleanup-stable"
+$out = "C:\Users\Константин Хотеев\Desktop\MVP v1.0\level4_trainer_bot_v0.1-questions-audio-cleanup-stable.zip"
+
+Remove-Item $dst -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item $out -Force -ErrorAction SilentlyContinue
+
+New-Item -ItemType Directory -Path $dst | Out-Null
+
+robocopy $src $dst /E `
+  /XD ".venv" "venv" "__pycache__" ".git" ".mypy_cache" ".pytest_cache" "secrets" "backups" `
+  /XF ".env" "*.db" "*.sqlite" "*.sqlite3" "*.pyc" "*.pyo" "*.log" "*.zip" "google_service_account.json"
+
+Compress-Archive -Path "$dst\*" -DestinationPath $out -Force
+
+Remove-Item $dst -Recurse -Force
+
+Write-Host "Created: $out"

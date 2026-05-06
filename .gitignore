@@ -1,0 +1,33 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+google_service_account.json
+*service_account*.json
+credentials.json
+token.json
+
+# Databases and backups
+*.db
+*.sqlite
+*.sqlite3
+backups/
+secrets/
+
+# Python cache and virtual environments
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Logs and archives
+*.log
+*.zip
+
+# Questions source audio (keep folder structure via .gitkeep if needed)
+media/questions/**
+!media/questions/
+!media/questions/**/
+!media/questions/**/.gitkeep

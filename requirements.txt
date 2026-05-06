@@ -1,0 +1,7 @@
+python-telegram-bot[job-queue]>=21,<22
+python-dotenv
+APScheduler
+gspread
+google-auth
+timezonefinder
+pytz

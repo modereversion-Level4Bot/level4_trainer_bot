@@ -1,0 +1,72 @@
+# Подготовка деплоя в Railway
+
+## Цель
+
+Развернуть `Level4Trainer` как один Python-сервис в режиме polling.
+
+## Start command
+
+В Railway должен использоваться:
+
+```bash
+python run.py
+```
+
+## Разделение токенов (dev vs official)
+
+Обязательное правило для polling-режима:
+- `dev/test BOT_TOKEN` используется только локально;
+- `official BOT_TOKEN` используется только в Railway (production/staging);
+- один и тот же `BOT_TOKEN` нельзя запускать одновременно в двух polling-процессах;
+- если Railway уже запущен с official token, локально этот же official token запускать нельзя.
+
+## Переменные окружения в Railway
+
+Рекомендуемый минимальный набор:
+- `BOT_TOKEN`
+- `ADMIN_IDS`
+- `APP_ENV=production`
+- `DB_PATH`
+- `BOT_VERSION`
+- `GOOGLE_SHEET_ID`
+- `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64`
+- `MEDIA_PRELOAD_CHAT_ID`
+- `MEDIA_PRELOAD_DELAY_SECONDS`
+
+## SQLite / `DB_PATH` в Railway
+
+`DB_PATH` определяет путь к файлу SQLite.
+SQLite допустим для MVP, но для Railway важно подключить persistent volume.
+
+Ключевые правила:
+- без persistent volume: данные не гарантированно сохраняются;
+- с persistent volume: база сохраняется между перезапусками.
+- для production/MVP deploy `DB_PATH` должен указывать путь внутри volume;
+- файл БД не должен попадать в GitHub.
+
+Пример:
+- `DB_PATH=/data/level4_trainer.db` (где `/data` смонтирован как Railway Volume).
+
+## Media / audio стратегия
+
+Для `🎙 Questions`:
+- `media/questions/*.mp3` не хранятся в GitHub;
+- локальные mp3 нужны только для `python scripts/preload_question_audio.py`;
+- runtime отправляет пользователю audio по Telegram `file_id` из `media_assets` (не из локального файла);
+- если production DB новая и `media_assets` пустая, нужно выполнить:
+  1) `python scripts/import_questions.py`  
+  2) `python scripts/preload_question_audio.py`.
+
+Исходные audio-файлы нужно хранить отдельно от GitHub:
+- локальный защищенный backup;
+- cloud storage;
+- Railway volume;
+- или другой согласованный storage.
+
+## Рекомендуемый порядок перед production запуском
+
+1. Подготовить env vars в Railway.
+2. Проверить, что `DB_PATH` указывает на Railway Volume.
+3. Выполнить импорт контента (`grammar`, `questions`) и preload audio.
+4. Запустить сервис командой `python run.py`.
+5. Проверить `/start` и базовый smoke в Telegram.
