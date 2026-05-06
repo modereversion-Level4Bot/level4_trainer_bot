@@ -25,6 +25,9 @@ venv/
 # Logs and archives
 *.log
 *.zip
+exports/
+*.media-assets-export.json
+*.media-assets-export.b64
 
 # Questions source audio (keep folder structure via .gitkeep if needed)
 media/questions/**

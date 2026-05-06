@@ -259,6 +259,17 @@ def _print_media_assets(
             SELECT COUNT(*)
             FROM media_assets
             WHERE feature = 'questions'
+              AND content_type = 'question_audio'
+              AND status = 'ready'
+            """,
+        )
+        _run_scalar_count(
+            conn,
+            "questions audio ready (legacy content_type='audio')",
+            """
+            SELECT COUNT(*)
+            FROM media_assets
+            WHERE feature = 'questions'
               AND content_type = 'audio'
               AND status = 'ready'
             """,
@@ -285,6 +296,18 @@ def _print_media_assets(
             SELECT COUNT(*)
             FROM media_assets
             WHERE feature = 'questions'
+              AND content_type = 'question_audio'
+              AND file_id IS NOT NULL
+              AND TRIM(CAST(file_id AS TEXT)) != ''
+            """,
+        )
+        _run_scalar_count(
+            conn,
+            "questions audio with non-empty file_id (legacy content_type='audio')",
+            """
+            SELECT COUNT(*)
+            FROM media_assets
+            WHERE feature = 'questions'
               AND content_type = 'audio'
               AND file_id IS NOT NULL
               AND TRIM(CAST(file_id AS TEXT)) != ''
@@ -307,7 +330,7 @@ def _print_media_assets(
                 SELECT content_key, local_path, status, last_error
                 FROM media_assets
                 WHERE feature = 'questions'
-                  AND content_type = 'audio'
+                  AND content_type = 'question_audio'
                   AND (status IS NULL OR status != 'ready')
                 ORDER BY content_key
                 LIMIT 10
