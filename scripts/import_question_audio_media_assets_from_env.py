@@ -1,9 +1,10 @@
-"""Import question_audio media_assets from base64 JSON env variable."""
+"""Import question_audio media_assets from env payload into media_assets table."""
 
 from __future__ import annotations
 
 import argparse
 import base64
+import gzip
 import json
 import os
 from pathlib import Path
@@ -13,7 +14,10 @@ import sys
 
 DEFAULT_DB_PATH = "/data/level4_trainer.db"
 EXPECTED_COUNT = 261
-IMPORT_ENV_KEY = "MEDIA_ASSETS_IMPORT_JSON_BASE64"
+IMPORT_PLAIN_ENV_KEY = "MEDIA_ASSETS_IMPORT_JSON_BASE64"
+IMPORT_GZIP_ENV_KEY = "MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64"
+IMPORT_GZIP_CHUNKS_ENV_KEY = "MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64_CHUNKS"
+IMPORT_GZIP_CHUNK_PREFIX = "MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64_CHUNK_"
 EXPECTED_EXPORT_TYPE = "question_audio_media_assets"
 EXPECTED_VERSION = 1
 
@@ -35,7 +39,7 @@ def _format_error(exc: Exception) -> str:
 def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Import question_audio media_assets from MEDIA_ASSETS_IMPORT_JSON_BASE64 "
+            "Import question_audio media_assets from env payload "
             "into media_assets table."
         )
     )
@@ -61,24 +65,84 @@ def _resolve_db_path() -> tuple[str, Path]:
     return db_path_value, db_path
 
 
-def _parse_payload_from_env() -> dict[str, object]:
-    encoded = os.getenv(IMPORT_ENV_KEY, "").strip()
-    if not encoded:
-        raise RuntimeError(f"{IMPORT_ENV_KEY} is missing or empty")
-
+def _decode_base64_payload(encoded: str, source_label: str) -> bytes:
     try:
-        decoded_bytes = base64.b64decode(encoded, validate=True)
+        return base64.b64decode(encoded, validate=True)
     except Exception as exc:
-        raise RuntimeError(f"{IMPORT_ENV_KEY} is not valid base64: {_format_error(exc)}") from exc
+        raise RuntimeError(f"{source_label} is not valid base64: {_format_error(exc)}") from exc
 
+
+def _parse_json_payload(decoded_bytes: bytes, source_label: str) -> dict[str, object]:
     try:
         payload = json.loads(decoded_bytes.decode("utf-8"))
     except Exception as exc:
-        raise RuntimeError(f"{IMPORT_ENV_KEY} does not decode to valid UTF-8 JSON: {_format_error(exc)}") from exc
+        raise RuntimeError(
+            f"{source_label} does not decode to valid UTF-8 JSON: {_format_error(exc)}"
+        ) from exc
 
     if not isinstance(payload, dict):
         raise RuntimeError("Decoded payload must be a JSON object")
     return payload
+
+
+def _parse_plain_base64_payload(encoded: str) -> dict[str, object]:
+    decoded_bytes = _decode_base64_payload(encoded, IMPORT_PLAIN_ENV_KEY)
+    return _parse_json_payload(decoded_bytes, IMPORT_PLAIN_ENV_KEY)
+
+
+def _parse_gzip_base64_payload(encoded: str, source_label: str) -> dict[str, object]:
+    decoded_bytes = _decode_base64_payload(encoded, source_label)
+    try:
+        unzipped = gzip.decompress(decoded_bytes)
+    except Exception as exc:
+        raise RuntimeError(f"{source_label} is not valid gzip payload: {_format_error(exc)}") from exc
+    return _parse_json_payload(unzipped, source_label)
+
+
+def _read_chunked_gzip_base64_payload() -> tuple[dict[str, object], str] | None:
+    count_raw = os.getenv(IMPORT_GZIP_CHUNKS_ENV_KEY, "").strip()
+    if not count_raw:
+        return None
+
+    try:
+        chunks_count = int(count_raw)
+    except ValueError as exc:
+        raise RuntimeError(f"{IMPORT_GZIP_CHUNKS_ENV_KEY} must be an integer") from exc
+
+    if chunks_count <= 0:
+        raise RuntimeError(f"{IMPORT_GZIP_CHUNKS_ENV_KEY} must be > 0")
+
+    chunks: list[str] = []
+    for index in range(1, chunks_count + 1):
+        chunk_env_key = f"{IMPORT_GZIP_CHUNK_PREFIX}{index:03d}"
+        chunk_value = os.getenv(chunk_env_key)
+        if chunk_value is None or not chunk_value.strip():
+            raise RuntimeError(f"Missing chunk variable: {chunk_env_key}")
+        chunks.append(chunk_value.strip())
+
+    combined = "".join(chunks)
+    payload = _parse_gzip_base64_payload(combined, "chunked gzip base64 payload")
+    return payload, "gzip_base64_chunks"
+
+
+def _load_payload_with_priority() -> tuple[dict[str, object], str]:
+    plain_base64 = os.getenv(IMPORT_PLAIN_ENV_KEY, "").strip()
+    if plain_base64:
+        return _parse_plain_base64_payload(plain_base64), "plain_base64"
+
+    gzip_base64 = os.getenv(IMPORT_GZIP_ENV_KEY, "").strip()
+    if gzip_base64:
+        return _parse_gzip_base64_payload(gzip_base64, IMPORT_GZIP_ENV_KEY), "gzip_base64"
+
+    chunked_payload = _read_chunked_gzip_base64_payload()
+    if chunked_payload is not None:
+        return chunked_payload
+
+    raise RuntimeError(
+        "No import payload found. Set one of: "
+        f"{IMPORT_PLAIN_ENV_KEY}, {IMPORT_GZIP_ENV_KEY}, "
+        f"or {IMPORT_GZIP_CHUNKS_ENV_KEY} + chunk variables."
+    )
 
 
 def _normalize_optional_text(value: object) -> str | None:
@@ -248,10 +312,6 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     configured_db_path, resolved_db_path = _resolve_db_path()
-    _safe_print("=== Import question_audio media_assets from env ===")
-    _safe_print(f"DB_PATH = {configured_db_path}")
-    _safe_print(f"mode = {'dry-run' if args.dry_run else 'confirm-import'}")
-
     if not resolved_db_path.exists():
         _safe_print(f"ERROR: DB file does not exist: {resolved_db_path}")
         return 1
@@ -260,13 +320,15 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     try:
-        payload = _parse_payload_from_env()
+        payload, input_mode = _load_payload_with_priority()
         records = _validate_metadata(payload)
     except RuntimeError as exc:
         _safe_print(f"ERROR: {exc}")
         return 1
 
+    _safe_print(f"input mode: {input_mode}")
     _safe_print(f"records decoded: {len(records)}")
+    _safe_print(f"DB_PATH = {configured_db_path}")
 
     conn: sqlite3.Connection | None = None
     try:
@@ -303,11 +365,9 @@ def main(argv: list[str] | None = None) -> int:
             imported_count = len(records)
             after_ready = before_ready
             after_non_empty_file_id = _count_questions_non_empty_file_id(conn)
-            _safe_print(f"imported/upserted count: {imported_count} (dry-run)")
-            _safe_print(f"after ready count: {after_ready} (dry-run, unchanged)")
-            _safe_print(
-                f"after non-empty file_id count: {after_non_empty_file_id} (dry-run, unchanged)"
-            )
+            _safe_print(f"imported/upserted count: {imported_count}")
+            _safe_print(f"after ready count: {after_ready}")
+            _safe_print(f"after non-empty file_id count: {after_non_empty_file_id}")
             if after_ready != EXPECTED_COUNT:
                 _safe_print(
                     f"WARNING: after ready count != expected ({after_ready} != {EXPECTED_COUNT})"
