@@ -63,6 +63,33 @@ SQLite допустим для MVP, но для Railway важно подклю�
 - Railway volume;
 - или другой согласованный storage.
 
+## Official Questions audio cache ops (MVP)
+
+Source of truth для official Questions audio cache:
+- таблица `media_assets`;
+- `feature='questions'`;
+- `content_type='question_audio'`.
+
+Official preload/cutover считается закрытым только если:
+- `question_audio` со `status='ready'` = `261`;
+- `question_audio` с non-empty `file_id` = `261`;
+- audio smoke в official bot пройден.
+
+Операционные скрипты (MVP):
+- `python scripts/preload_question_audio.py`
+- `python scripts/export_question_audio_media_assets.py`
+- `python scripts/import_question_audio_media_assets_from_env.py`
+- `python scripts/diagnose_railway_db.py`
+
+Если payload не помещается в одну Railway variable, используйте chunked gzip переменные:
+- `MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64_CHUNKS`
+- `MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64_CHUNK_001`
+- `MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64_CHUNK_002`
+
+Важно:
+- после любых temporary Railway Start Command для диагностики/импорта вернуть Start Command на `python run.py`;
+- текущий workflow — MVP-операционный; далее планируется более безопасный контур через Admin Content Import / Google Drive audio workflow.
+
 ## Рекомендуемый порядок перед production запуском
 
 1. Подготовить env vars в Railway.

@@ -361,6 +361,7 @@ async def send_question_audio_if_exists(
         )
         return
 
+    file_id_present = bool(file_id)
     sent_message_id: int | None = None
     try:
         sent_message = await bot.send_audio(
@@ -376,12 +377,12 @@ async def send_question_audio_if_exists(
     except Exception as exc:
         logger.warning(
             "Questions audio send by file_id failed; showing text-only question: "
-            "user_id=%s chat_id=%s content_key=%s file_id=%s status=%s audio_file=%s "
+            "user_id=%s chat_id=%s content_key=%s file_id_present=%s status=%s audio_file=%s "
             "error_type=%s error=%s",
             user_id,
             chat_id,
             content_key,
-            file_id,
+            file_id_present,
             ready_asset.get("status"),
             audio_file,
             type(exc).__name__,
@@ -392,11 +393,11 @@ async def send_question_audio_if_exists(
     if sent_message_id is None:
         logger.warning(
             "Questions audio send by file_id returned no message_id: "
-            "user_id=%s chat_id=%s content_key=%s file_id=%s",
+            "user_id=%s chat_id=%s content_key=%s file_id_present=%s",
             user_id,
             chat_id,
             content_key,
-            file_id,
+            file_id_present,
         )
         return
 
@@ -413,12 +414,12 @@ async def send_question_audio_if_exists(
             )
         logger.debug(
             "Questions temp audio send registered: "
-            "user_id=%s chat_id=%s message_id=%s content_key=%s file_id=%s",
+            "user_id=%s chat_id=%s message_id=%s content_key=%s file_id_present=%s",
             user_id,
             chat_id,
             sent_message_id,
             content_key,
-            file_id,
+            file_id_present,
         )
     except Exception:
         logger.warning(

@@ -12,6 +12,7 @@ from telegram.ext import (
 )
 
 from core.guards import run_guard_chain
+from core.safe_telegram import safe_answer_callback
 from features.onboarding.keyboards import ONBOARDING_CALLBACK_PREFIX
 from features.onboarding.service import (
     process_onboarding_callback,
@@ -25,6 +26,9 @@ async def onboarding_callback_router(
     context: ContextTypes.DEFAULT_TYPE,
 ) -> None:
     if not await run_guard_chain(update, context):
+        query = update.callback_query
+        if query is not None:
+            await safe_answer_callback(query)
         return
     _ = await process_onboarding_callback(update, context)
 

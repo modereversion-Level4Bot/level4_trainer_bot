@@ -39,6 +39,26 @@ Use this checklist before pushing to GitHub, creating archives, or deploying.
 - `media/questions/*.mp3` source files are not committed to GitHub.
 - Source audio is stored separately (local backup / cloud storage / Railway volume / agreed storage).
 
+## 4.1) Official Questions audio cache checks (MVP ops)
+
+- Runtime cache source is `media_assets` with:
+  - `feature='questions'`
+  - `content_type='question_audio'`
+- Closure criteria for official preload/cutover:
+  - `status='ready'` count = `261`
+  - non-empty `file_id` count = `261`
+  - official bot audio smoke is successful
+- For DB-to-Railway cache transfer use ops scripts:
+  - `python scripts/export_question_audio_media_assets.py`
+  - `python scripts/import_question_audio_media_assets_from_env.py`
+  - `python scripts/diagnose_railway_db.py`
+- For Railway variable size limit use chunked gzip variables:
+  - `MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64_CHUNKS`
+  - `MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64_CHUNK_001`
+  - `MEDIA_ASSETS_IMPORT_JSON_GZIP_BASE64_CHUNK_002`
+- After any temporary Railway Start Command for diagnostics/import, restore:
+  - `python run.py`
+
 ## 5) Final pre-release check
 
 - Run baseline checks:
