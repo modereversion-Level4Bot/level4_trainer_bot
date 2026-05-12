@@ -58,7 +58,7 @@ def get_settings() -> Settings:
         bot_token=bot_token,
         admin_ids=admin_ids,
         app_env=os.getenv("APP_ENV", "local"),
-        db_path=os.getenv("DB_PATH", "level4_trainer.db"),
+        db_path=os.getenv("DB_PATH", "data/local/dev_main.db"),
         bot_version=os.getenv("BOT_VERSION", "0.1"),
         google_sheet_id=os.getenv("GOOGLE_SHEET_ID", "").strip(),
         google_service_account_json_base64=os.getenv(

@@ -13,7 +13,7 @@ from config import BASE_DIR
 
 def resolve_db_path() -> Path:
     """Resolve DB path from settings and ensure parent directory exists."""
-    db_path = Path(os.getenv("DB_PATH", "level4_trainer.db"))
+    db_path = Path(os.getenv("DB_PATH", "data/local/dev_main.db"))
     if not db_path.is_absolute():
         db_path = BASE_DIR / db_path
 

@@ -9,12 +9,14 @@ from features.main_menu.texts import (
     exam_info_button_text,
     grammar_button_text,
     questions_button_text,
+    routes_button_text,
     settings_button_text,
 )
 
 
 MENU_GRAMMAR_CALLBACK = "menu:grammar"
 MENU_QUESTIONS_CALLBACK = "menu:questions"
+MENU_ROUTES_CALLBACK = "menu:routes"
 MENU_EXAM_INFO_CALLBACK = "exam_info:overview"
 MENU_SETTINGS_CALLBACK = "menu:settings"
 
@@ -39,6 +41,16 @@ def build_main_menu_keyboard(language: str, *, context: MainMenuContext) -> Inli
         )
     if top_row:
         rows.append(top_row)
+
+    if context.has_routes_content:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text=routes_button_text(language),
+                    callback_data=MENU_ROUTES_CALLBACK,
+                )
+            ]
+        )
 
     rows.append(
         [

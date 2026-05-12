@@ -9,6 +9,13 @@ import sqlite3
 _ALLOWED_STATUSES = {"ready", "missing", "failed", "outdated", "skipped"}
 _QUESTIONS_FEATURE = "questions"
 _QUESTION_AUDIO_CONTENT_TYPE = "question_audio"
+_ROUTES_FEATURE = "routes"
+_ROUTE_BRIEFING_IMAGE_CONTENT_TYPE = "route_briefing_image"
+_ROUTE_STEP_IMAGE_CONTENT_TYPE = "route_step_image"
+_ROUTE_NEWS_IMAGE_CONTENT_TYPE = "route_news_image"
+_ROUTE_QUESTION_IMAGE_CONTENT_TYPE = "route_question_image"
+_ROUTE_STEP_AUDIO_CONTENT_TYPE = "route_step_audio"
+_ROUTE_NEWS_AUDIO_CONTENT_TYPE = "route_news_audio"
 
 
 def _required_text(value: str, *, field_name: str) -> str:
@@ -275,21 +282,21 @@ def mark_media_asset_failed(
     )
 
 
-def clear_orphaned_question_audio_assets(
+def _clear_orphaned_assets(
     conn: sqlite3.Connection,
+    *,
+    feature: str,
+    content_type: str,
     active_content_keys: Iterable[str],
+    last_error: str,
 ) -> int:
-    """
-    Mark stale question-audio assets as outdated.
-
-    Assets are not physically deleted, only marked with status="outdated".
-    """
+    """Mark stale media assets for one feature/content type as outdated."""
     normalized_active_keys = {
         key.strip()
         for key in active_content_keys
         if isinstance(key, str) and key.strip()
     }
-    params: list[object] = [_QUESTIONS_FEATURE, _QUESTION_AUDIO_CONTENT_TYPE]
+    params: list[object] = [feature, content_type]
     not_in_clause = ""
     if normalized_active_keys:
         placeholders = ",".join("?" for _ in normalized_active_keys)
@@ -300,14 +307,116 @@ def clear_orphaned_question_audio_assets(
         f"""
         UPDATE media_assets
         SET status = 'outdated',
-            last_error = 'No active question uses this asset after latest preload.',
+            last_error = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE feature = ?
           AND content_type = ?
           AND status <> 'outdated'
           {not_in_clause}
         """,
-        tuple(params),
+        (last_error, *params),
     )
     changed = int(cursor.rowcount or 0)
     return changed if changed > 0 else 0
+
+
+def clear_orphaned_question_audio_assets(
+    conn: sqlite3.Connection,
+    active_content_keys: Iterable[str],
+) -> int:
+    """
+    Mark stale question-audio assets as outdated.
+
+    Assets are not physically deleted, only marked with status="outdated".
+    """
+    return _clear_orphaned_assets(
+        conn,
+        feature=_QUESTIONS_FEATURE,
+        content_type=_QUESTION_AUDIO_CONTENT_TYPE,
+        active_content_keys=active_content_keys,
+        last_error="No active question uses this asset after latest preload.",
+    )
+
+
+def clear_orphaned_route_step_audio_assets(
+    conn: sqlite3.Connection,
+    active_content_keys: Iterable[str],
+) -> int:
+    """Mark stale route-step-audio assets as outdated."""
+    return _clear_orphaned_assets(
+        conn,
+        feature=_ROUTES_FEATURE,
+        content_type=_ROUTE_STEP_AUDIO_CONTENT_TYPE,
+        active_content_keys=active_content_keys,
+        last_error="No active route step uses this asset after latest preload.",
+    )
+
+
+def clear_orphaned_route_news_audio_assets(
+    conn: sqlite3.Connection,
+    active_content_keys: Iterable[str],
+) -> int:
+    """Mark stale route-news-audio assets as outdated."""
+    return _clear_orphaned_assets(
+        conn,
+        feature=_ROUTES_FEATURE,
+        content_type=_ROUTE_NEWS_AUDIO_CONTENT_TYPE,
+        active_content_keys=active_content_keys,
+        last_error="No active route news uses this asset after latest preload.",
+    )
+
+
+def clear_orphaned_route_briefing_image_assets(
+    conn: sqlite3.Connection,
+    active_content_keys: Iterable[str],
+) -> int:
+    """Mark stale route-briefing-image assets as outdated."""
+    return _clear_orphaned_assets(
+        conn,
+        feature=_ROUTES_FEATURE,
+        content_type=_ROUTE_BRIEFING_IMAGE_CONTENT_TYPE,
+        active_content_keys=active_content_keys,
+        last_error="No active route briefing uses this asset after latest preload.",
+    )
+
+
+def clear_orphaned_route_step_image_assets(
+    conn: sqlite3.Connection,
+    active_content_keys: Iterable[str],
+) -> int:
+    """Mark stale route-step-image assets as outdated."""
+    return _clear_orphaned_assets(
+        conn,
+        feature=_ROUTES_FEATURE,
+        content_type=_ROUTE_STEP_IMAGE_CONTENT_TYPE,
+        active_content_keys=active_content_keys,
+        last_error="No active route step uses this image after latest preload.",
+    )
+
+
+def clear_orphaned_route_news_image_assets(
+    conn: sqlite3.Connection,
+    active_content_keys: Iterable[str],
+) -> int:
+    """Mark stale route-news-image assets as outdated."""
+    return _clear_orphaned_assets(
+        conn,
+        feature=_ROUTES_FEATURE,
+        content_type=_ROUTE_NEWS_IMAGE_CONTENT_TYPE,
+        active_content_keys=active_content_keys,
+        last_error="No active route news uses this image after latest preload.",
+    )
+
+
+def clear_orphaned_route_question_image_assets(
+    conn: sqlite3.Connection,
+    active_content_keys: Iterable[str],
+) -> int:
+    """Mark stale route-question-image assets as outdated."""
+    return _clear_orphaned_assets(
+        conn,
+        feature=_ROUTES_FEATURE,
+        content_type=_ROUTE_QUESTION_IMAGE_CONTENT_TYPE,
+        active_content_keys=active_content_keys,
+        last_error="No active route question uses this image after latest preload.",
+    )

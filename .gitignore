@@ -34,3 +34,30 @@ media/questions/**
 !media/questions/
 !media/questions/**/
 !media/questions/**/.gitkeep
+
+# Routes source media (local-only source files; keep folders via .gitkeep)
+media/routes/**/*.mp3
+media/routes/**/*.ogg
+media/routes/**/*.wav
+media/routes/**/*.m4a
+media/routes/**/*.jpg
+media/routes/**/*.jpeg
+media/routes/**/*.png
+media/routes/**/*.webp
+!media/routes/**/.gitkeep
+
+# Legacy local media folders (local-only; keep folder structure)
+media/audio/**
+!media/audio/
+!media/audio/**/
+!media/audio/**/.gitkeep
+
+media/images/**
+!media/images/
+!media/images/**/
+!media/images/**/.gitkeep
+
+media/voice/**
+!media/voice/
+!media/voice/**/
+!media/voice/**/.gitkeep

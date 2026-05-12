@@ -30,6 +30,7 @@ copy .env.example .env
 Откройте файл `.env` и укажите:
 - `BOT_TOKEN=<токен вашего Telegram-бота>`
 - `MEDIA_PRELOAD_CHAT_ID=<chat_id служебного чата/админа для preload audio>`
+- `DB_PATH=data/local/dev_main.db` (основная локальная рабочая БД)
 
 Остальные переменные можно оставить базовыми на первом запуске.
 
@@ -40,6 +41,7 @@ python scripts/init_db.py
 ```
 
 Ожидаемый результат: применены SQL-схемы `001..017`, создан файл базы данных.
+Рекомендуемый локальный путь: `data/local/dev_main.db`.
 
 Опционально (если в Google Sheets уже подготовлены листы grammar):
 
@@ -88,6 +90,23 @@ python scripts/preload_question_audio.py
 - сохраняет `file_id` в `media_assets`;
 - помечает проблемные файлы как `missing/failed/skipped`;
 - помечает устаревшие `questions`-assets как `outdated`.
+
+Опционально для `Routes`:
+
+```bash
+python scripts/import_routes.py --confirm-import
+python scripts/preload_route_images.py
+python scripts/preload_route_audio.py
+```
+
+Или unified командой:
+
+```bash
+python scripts/preload_route_media.py --types audio,image
+```
+
+Для `Routes` media основной формат путей в Sheets: относительно `media/routes/`
+(например, `route_001/images/...` и `route_001/audio/...`).
 
 ## 7) Выполнить smoke-check
 

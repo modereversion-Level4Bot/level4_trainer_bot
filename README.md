@@ -78,6 +78,10 @@ Security note:
 - не коммитьте `.env`, `.db` и credentials-файлы;
 - перед релизом используйте чек-лист: [`docs/release_checklist.md`](docs/release_checklist.md).
 
+DB policy:
+- локально по умолчанию используется `DB_PATH=data/local/dev_main.db`;
+- для Railway production используйте `DB_PATH=/data/level4_trainer.db`.
+
 ## Инициализация SQLite
 
 Выполните:
@@ -86,7 +90,8 @@ Security note:
 python scripts/init_db.py
 ```
 
-Скрипт применит SQL-схемы и создаст файл базы данных SQLite по пути из `DB_PATH`.
+Скрипт применит SQL-схемы и создаст файл базы данных SQLite по пути из `DB_PATH`
+(по умолчанию локально: `data/local/dev_main.db`).
 
 ## Smoke-check
 

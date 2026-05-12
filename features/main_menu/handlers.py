@@ -7,11 +7,13 @@ from telegram.ext import Application, CallbackQueryHandler, ContextTypes
 
 from core.guards import run_guard_chain
 from core.safe_telegram import safe_answer_callback
-from features.main_menu.service import get_user_language_by_telegram_id
+from features.main_menu.keyboards import MENU_ROUTES_CALLBACK
+from features.main_menu.service import (
+    get_user_language_by_telegram_id,
+    get_user_row_by_telegram_id,
+)
 from features.main_menu.texts import todo_section_alert
-
-
-MENU_ROUTES_CALLBACK = "menu:routes"
+from features.routes.service import is_routes_ui_enabled, show_routes_list
 
 
 async def handle_main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -25,7 +27,8 @@ async def handle_main_menu_callback(update: Update, context: ContextTypes.DEFAUL
         return
 
     user = update.effective_user
-    if user is None:
+    chat = update.effective_chat
+    if user is None or chat is None:
         await safe_answer_callback(query)
         return
 
@@ -33,10 +36,26 @@ async def handle_main_menu_callback(update: Update, context: ContextTypes.DEFAUL
         return
 
     language = get_user_language_by_telegram_id(user.id)
-    await safe_answer_callback(
-        query,
-        text=todo_section_alert(language),
-        show_alert=True,
+    if not is_routes_ui_enabled():
+        await safe_answer_callback(
+            query,
+            text=todo_section_alert(language),
+            show_alert=True,
+        )
+        return
+
+    user_row = get_user_row_by_telegram_id(user.id)
+    if user_row is None:
+        await safe_answer_callback(query)
+        return
+
+    await safe_answer_callback(query)
+    await show_routes_list(
+        bot=context.bot,
+        chat_id=chat.id,
+        user_id=int(user_row["id"]),
+        language=language,
+        page=1,
     )
 
 

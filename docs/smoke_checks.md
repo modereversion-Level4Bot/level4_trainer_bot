@@ -57,18 +57,17 @@
 4. Кнопки контентных разделов показываются только при наличии активного контента:
    - нет `main`-тем в `grammar_topics` -> кнопка `📘` скрыта;
    - нет активных `exam_questions` -> кнопка `🎙` скрыта.
-5. Кнопка `🛫 Маршруты / 🛫 Routes` на главном экране пока не показывается (раздел остаётся следующим этапом).
+5. Кнопка `🛫 Маршруты / 🛫 Routes` отображается только если одновременно:
+   - `ENABLE_ROUTES_UI=1`;
+   - есть активный routes-контент (active routes > 0).
 6. Layout кнопок главного меню:
-   - RU: `[📘 Грамматика] [🎙 Вопросы]`, затем `[ℹ️ Как проходит экзамен]`, затем `[⚙️ Настройки]`;
-   - EN: `[📘 Grammar] [🎙 Questions]`, затем `[ℹ️ How the exam works]`, затем `[⚙️ Settings]`.
+   - RU: `[📘 Грамматика] [🎙 Вопросы]`, затем (при выполнении условий п.5) `[🛫 Маршруты]`, затем `[ℹ️ Как проходит экзамен]`, затем `[⚙️ Настройки]`;
+   - EN: `[📘 Grammar] [🎙 Questions]`, затем (при выполнении условий п.5) `[🛫 Routes]`, затем `[ℹ️ How the exam works]`, затем `[⚙️ Settings]`.
 7. Кнопка `ℹ️ Как проходит экзамен / ℹ️ How the exam works` отображается всегда.
 8. Кнопка `⚙️ Настройки / ⚙️ Settings` отображается всегда.
 9. В главном меню нет кнопки `🛠 Управление / 🛠 Management`.
 10. Для администратора в тексте главного меню остаются статусные строки `🟢 ...` и `🎮 v ...`.
-11. Нажатие на кнопку `🛫 Routes` (если callback вызван вручную) показывает `alert/popup` TODO:
-   - RU: `Раздел будет реализован в следующих задачах.`
-   - EN: `This section will be implemented in future tasks.`
-   - отдельные сообщения в чат не отправляются.
+11. Нажатие на кнопку `🛫 Routes` открывает список маршрутов (`Routes list`) в основном UI-сообщении.
 12. Нажатие `📘 Грамматика / 📘 Grammar` открывает экран списка grammar topics в основном UI.
 13. Нажатие `🎙 Вопросы / 🎙 Questions` открывает уровни Questions (не TODO-alert).
 14. Нажатие `⚙️ Настройки / ⚙️ Settings` открывает полноценный экран настроек в основном UI.
@@ -504,6 +503,44 @@
 6. Для неподдерживаемых расширений ставится `status = skipped`.
 7. Неактуальные assets (которых нет среди активных content keys) помечаются `status = outdated`.
 8. В конце есть summary по `ready existing / uploaded / missing / failed / skipped / outdated`.
+
+## Routes smoke checks (v1.0)
+
+Локальные env для Routes smoke:
+
+- `DB_PATH=data/local/dev_main.db`
+- `ENABLE_ROUTES_UI=1`
+
+Что проверить:
+
+1. Routes list:
+   - при выполнении условий из блока Main menu кнопка `🛫 Routes` видна;
+   - нажатие открывает `Routes list` с пагинацией/навигацией.
+2. Briefing:
+   - выбор маршрута открывает `Briefing`;
+   - в briefing доступны входы в `Start`, `News`, `Questions`.
+3. Full flow:
+   - `Routes list -> Briefing -> Start -> Scenario steps -> random News -> random Question Block -> Finish`;
+   - в full mode прогресс маршрута засчитывается только на `Finish`;
+   - в full mode нет кнопки возврата `⬅️ К маршруту`.
+4. Free news flow:
+   - `Briefing -> News list -> selected News -> Question block list -> Questions -> Finish`;
+   - в free mode прогресс маршрута не засчитывается;
+   - в free mode есть возврат `⬅️ К маршруту`.
+5. Free questions flow:
+   - `Briefing -> Question block list -> Questions -> Finish`;
+   - в free mode прогресс маршрута не засчитывается;
+   - в free mode есть возврат `⬅️ К маршруту`.
+6. Interrupt:
+   - full mode: нажатие `Main menu` открывает interrupt confirmation (`остаться / выйти`);
+   - free mode: `Main menu` возвращает напрямую без interrupt confirm.
+7. Media order:
+   - порядок отображения: `image -> audio -> text/buttons`;
+   - runtime audio для routes отправляется только через `media_assets/file_id`;
+   - runtime images работают в режиме cache-first через `media_assets/file_id` с local fallback.
+8. Clean chat:
+   - в routes-flow пользовательские сообщения удаляются clean-chat guard-слоем best-effort;
+   - временные route media-сообщения очищаются при навигации между экранами.
 
 ## Актуальные onboarding UX-параметры
 

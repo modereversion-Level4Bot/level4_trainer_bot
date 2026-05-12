@@ -68,6 +68,10 @@ def questions_button_text(language: str) -> str:
     return "🎙 Вопросы" if normalize_language(language) == "ru" else "🎙 Questions"
 
 
+def routes_button_text(language: str) -> str:
+    return "🛫 Маршруты" if normalize_language(language) == "ru" else "🛫 Routes"
+
+
 def exam_info_button_text(language: str) -> str:
     if normalize_language(language) == "ru":
         return "ℹ️ Как проходит экзамен"

@@ -10,6 +10,7 @@ from features.grammar.handlers import register_handlers as register_grammar_hand
 from features.main_menu.handlers import register_handlers as register_main_menu_handlers
 from features.onboarding.handlers import register_handlers as register_onboarding_handlers
 from features.questions.handlers import register_handlers as register_questions_handlers
+from features.routes.handlers import register_handlers as register_routes_handlers
 from features.settings.handlers import register_handlers as register_settings_handlers
 from features.start.handlers import register_handlers as register_start_handlers
 
@@ -21,9 +22,10 @@ def register_handlers(application: Application) -> None:
     register_settings_handlers(application)
     register_grammar_handlers(application)
     register_questions_handlers(application)
+    register_routes_handlers(application)
     register_main_menu_handlers(application)
     register_exam_info_handlers(application)
     register_clean_chat_handlers(application)
 
     # TODO: Register handlers for remaining features:
-    # routes, admin, feedback, ads, announcements, notifications.
+    # admin, feedback, ads, announcements, notifications.

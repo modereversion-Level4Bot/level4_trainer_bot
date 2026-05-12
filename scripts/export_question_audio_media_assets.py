@@ -11,8 +11,15 @@ from pathlib import Path
 import sqlite3
 import sys
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-DEFAULT_DB_PATH = "/data/level4_trainer.db"
+from config import BASE_DIR
+
+
+DEFAULT_LOCAL_DB_PATH = "data/local/dev_main.db"
+DEFAULT_RAILWAY_DB_PATH = "/data/level4_trainer.db"
 EXPECTED_COUNT = 261
 EXPORT_TYPE = "question_audio_media_assets"
 EXPORT_VERSION = 1
@@ -43,11 +50,13 @@ def _format_error(exc: Exception) -> str:
 
 
 def _resolve_db_path() -> tuple[str, Path]:
+    app_env = os.getenv("APP_ENV", "local").strip().lower()
+    default_db_path = DEFAULT_RAILWAY_DB_PATH if app_env == "production" else DEFAULT_LOCAL_DB_PATH
     env_value = os.getenv("DB_PATH", "").strip()
-    db_path_value = env_value if env_value else DEFAULT_DB_PATH
+    db_path_value = env_value if env_value else default_db_path
     db_path = Path(db_path_value).expanduser()
     if not db_path.is_absolute():
-        db_path = db_path.resolve()
+        db_path = (BASE_DIR / db_path).resolve()
     return db_path_value, db_path
 
 
@@ -193,11 +202,12 @@ def _write_output_files(
 
 
 def main() -> int:
-    project_root = Path(__file__).resolve().parents[1]
+    project_root = PROJECT_ROOT
     configured_db_path, resolved_db_path = _resolve_db_path()
 
     _safe_print("=== Export question_audio media_assets ===")
     _safe_print(f"DB_PATH = {configured_db_path}")
+    _safe_print(f"Resolved DB path = {resolved_db_path}")
 
     if not resolved_db_path.exists():
         _safe_print(f"ERROR: DB file does not exist: {resolved_db_path}")

@@ -133,7 +133,7 @@ def log_startup_banner(
     logger.info("🤖 [SYSTEM] Level 4 Trainer bot is running...")
     logger.info("🎮 [SYSTEM] Version: %s", _format_version(bot_version))
     logger.info("🌍 [SYSTEM] Environment: %s", (app_env or "local").strip() or "local")
-    logger.info("🗄️ [SYSTEM] SQLite DB: %s", (db_path or "level4_trainer.db").strip())
+    logger.info("🗄️ [SYSTEM] SQLite DB: %s", (db_path or "data/local/dev_main.db").strip())
     logger.info("📡 [SYSTEM] Mode: polling")
     if handlers_registered:
         logger.info("🧩 [SYSTEM] Handlers registered")

@@ -47,6 +47,10 @@ SQLite допустим для MVP, но для Railway важно подклю�
 Пример:
 - `DB_PATH=/data/level4_trainer.db` (где `/data` смонтирован как Railway Volume).
 
+Каноническая политика путей:
+- local/dev: `data/local/dev_main.db`;
+- Railway production: `/data/level4_trainer.db`.
+
 ## Media / audio стратегия
 
 Для `🎙 Questions`:
@@ -62,6 +66,15 @@ SQLite допустим для MVP, но для Railway важно подклю�
 - cloud storage;
 - Railway volume;
 - или другой согласованный storage.
+
+Для `🛣 Routes`:
+- source media paths в Sheets указываются относительно `media/routes/`
+  (например, `route_001/images/pic.jpeg`, `route_001/audio/file.mp3`);
+- preload images: `python scripts/preload_route_images.py`;
+- preload audio: `python scripts/preload_route_audio.py`;
+- или unified pipeline: `python scripts/preload_route_media.py --types audio,image`;
+- runtime для route images использует `media_assets` (`file_id`) с fallback на local file;
+- runtime для route audio использует только `media_assets` (`file_id`) без local upload в user chat.
 
 ## Official Questions audio cache ops (MVP)
 

@@ -31,7 +31,7 @@
 - `scripts/import_grammar.py` реализован для листов `grammar_topics` и `grammar_questions`;
 - `scripts/import_questions.py` реализован для листа `questions`;
 - `scripts/preload_question_audio.py` реализован для preload аудио вопросов в Telegram (`file_id` cache);
-- остальные скрипты остаются каркасом для следующих этапов.
+- `scripts/import_routes.py` реализован как foundation-import для листов `routes`, `route_steps`, `route_news`, `route_question_blocks`, `route_questions` (без включения Routes UI).
 
 Запуск импорта грамматики:
 
@@ -92,17 +92,150 @@ python scripts/check_google_sheets.py
 - скрипт **не** импортирует данные в SQLite;
 - скрипт выводит только результат проверки и не печатает секреты (`GOOGLE_SERVICE_ACCOUNT_JSON_BASE64`, `private_key`, полный JSON credentials).
 
-## Планируемые листы (таблицы контента)
+## Листы Routes v1.0 (Phase 1 foundation)
 
-В дальнейшем планируется использовать листы:
-- `grammar_topics`
-- `grammar_questions`
-- `questions`
+Листы:
+
 - `routes`
-- `route_briefings`
 - `route_steps`
 - `route_news`
+- `route_question_blocks`
 - `route_questions`
+
+### `routes`
+
+Headers (строго по порядку):
+
+- `route_id`
+- `route_order`
+- `title_ru`
+- `title_en`
+- `briefing_ru`
+- `briefing_en`
+- `image_file`
+- `is_active`
+
+Правила:
+
+- `route_id`, `route_order`, `title_ru`, `briefing_ru`, `is_active` обязательны;
+- `route_id` должен быть уникален в листе;
+- для `image_file` основной формат: путь относительно `media/routes/`, например `route_001/images/pic_briefing.jpeg`;
+- runtime route briefing image сначала пытается отправить Telegram `file_id` из `media_assets`, затем fallback на local file;
+- `is_active` только `0` или `1`.
+
+### `route_steps`
+
+Headers:
+
+- `route_id`
+- `step_number`
+- `step_type`
+- `text_ru`
+- `text_en`
+- `image_file`
+- `audio_file`
+- `transcript_ru`
+- `transcript_en`
+- `pilot_answer_ru`
+- `pilot_answer_en`
+- `is_active`
+
+Правила:
+
+- обязательны: `route_id`, `step_number`, `step_type`, `is_active`;
+- `step_type` только: `atis`, `atc_command`, `situation`, `info`;
+- `pilot_prompt` больше не используется как активный тип;
+- если нужен proactive pilot phrase, используйте `step_type='info'` или `step_type='situation'` и заполните `pilot_answer_ru`/`pilot_answer_en`;
+- For proactive pilot phrase, use `step_type='info'` or `step_type='situation'` and fill `pilot_answer_ru`/`pilot_answer_en`;
+- `pilot_answer_ru`/`pilot_answer_en` опциональны:
+  - заполнены -> bot показывает кнопку `💬 Показать ответ / 💬 Show answer`;
+  - пустые -> кнопка ответа не показывается;
+- для `image_file` основной формат: путь относительно `media/routes/`, например `route_001/images/pic_route_1.jpeg`;
+- для `audio_file` основной формат: путь относительно `media/routes/`, например `route_001/audio/route_001_atis.mp3`;
+- source folder structure для route media:
+  - `media/routes/route_001/images/`
+  - `media/routes/route_001/audio/`
+- legacy values (только имя файла или `media/routes/...`) временно поддерживаются для migration window;
+- runtime route image сначала пытается отправить Telegram `file_id` из `media_assets`, затем fallback на local file;
+- runtime отправляет route audio только через Telegram `file_id` cache из `media_assets` (без local upload в пользовательский чат);
+- ключ уникальности: `(route_id, step_number)`;
+- `route_id` должен существовать в листе `routes`.
+
+### `route_news`
+
+Headers:
+
+- `route_id`
+- `news_id`
+- `news_order`
+- `image_file`
+- `audio_file`
+- `transcript_ru`
+- `transcript_en`
+- `is_active`
+
+Правила:
+
+- обязательны: `route_id`, `news_id`, `news_order`, `is_active`;
+- `image_file` и `audio_file` опциональны;
+- для `image_file` основной формат: путь относительно `media/routes/`, например `route_001/images/pic_route_1.jpeg`;
+- для `audio_file` основной формат: путь относительно `media/routes/`, например `route_001/audio/route_001_news_01.mp3`;
+- source folder structure для route media:
+  - `media/routes/route_001/images/`
+  - `media/routes/route_001/audio/`
+- legacy values (только имя файла или `media/routes/...`) временно поддерживаются для migration window;
+- runtime route news image сначала пытается отправить Telegram `file_id` из `media_assets`, затем fallback на local file;
+- runtime route news audio также использует только `media_assets` (`file_id` cache);
+- ключ уникальности: `(route_id, news_id)`;
+- `route_id` должен существовать в листе `routes`.
+
+### `route_question_blocks`
+
+Headers:
+
+- `route_id`
+- `block_id`
+- `block_order`
+- `is_active`
+
+Правила:
+
+- обязательны: `route_id`, `block_id`, `block_order`, `is_active`;
+- ключ уникальности: `(route_id, block_id)`;
+- `route_id` должен существовать в листе `routes`.
+
+### `route_questions`
+
+Headers:
+
+- `route_id`
+- `block_id`
+- `question_number`
+- `question_en`
+- `question_translation_ru`
+- `image_file`
+- `is_active`
+
+Правила:
+
+- обязательны: `route_id`, `block_id`, `question_number`, `question_en`, `is_active`;
+- `question_translation_ru` и `image_file` опциональны;
+- для `image_file` основной формат: путь относительно `media/routes/`, например `route_001/images/pic_question_01.jpeg`;
+- runtime route question image сначала пытается отправить Telegram `file_id` из `media_assets`, затем fallback на local file;
+- ключ уникальности: `(route_id, block_id, question_number)`;
+- `route_id` должен существовать в листе `routes`;
+- `block_id` должен существовать в `route_question_blocks` для того же `route_id`.
+
+### Поведение импорта Routes
+
+- строгая валидация headers по названию и порядку;
+- при отсутствии листа/headers import завершается с ошибкой;
+- active-sync: строки, отсутствующие в Sheets, переводятся в `is_active=0` (без delete);
+- `route_progress` и `route_user_state` в Phase 1 не сбрасываются.
+
+## Планируемые листы (post-MVP)
+
+- `route_briefings` (legacy/optional for future review)
 - `daily_tips`
 - `training_reminders`
 

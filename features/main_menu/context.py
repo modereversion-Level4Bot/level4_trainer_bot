@@ -15,5 +15,6 @@ class MainMenuContext:
     routes_completed: int
     has_grammar_content: bool
     has_questions_content: bool
+    has_routes_content: bool
     is_admin: bool
     bot_version: str

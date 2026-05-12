@@ -34,8 +34,17 @@
      - зафиксировать финальные guard/safety условия.
 
 6. `media_assets` coverage
-   - Сейчас `media_assets` используется только для `Questions` audio.
+   - Сейчас `media_assets` используется для:
+     - `Questions` audio;
+     - `Routes` step/news audio;
+     - `Routes` briefing/step/news/question images.
+   - Runtime cache через Telegram `file_id` уже используется/подготовлен в этих потоках.
    - После MVP расширить/унифицировать для:
-     - `Routes` media;
      - сервисных media-слоёв;
      - admin/media preload workflows.
+
+7. Routes media source/storage + admin content import center
+   - Для `Routes` в Phase 1 зафиксирован только import foundation из Sheets.
+   - Runtime cache для route media уже опирается на Telegram `file_id` (`media_assets`), но production source storage для исходников остается открытым вопросом.
+   - Post-MVP нужно утвердить source-of-truth для route media (`audio/image`) и способ хранения вне локальных временных путей.
+   - Нужен отдельный admin/content workflow (Google Drive или другой централизованный storage) с безопасным импортом в production.

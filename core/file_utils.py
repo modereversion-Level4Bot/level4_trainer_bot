@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 SUPPORTED_AUDIO_EXTENSIONS = {".mp3", ".ogg", ".wav", ".m4a"}
+SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 
 def _to_path(path: str | Path) -> Path:
@@ -38,3 +39,9 @@ def is_supported_audio_extension(path: str | Path) -> bool:
     """Return True when file extension is one of supported audio formats."""
     file_path = _to_path(path)
     return file_path.suffix.lower() in SUPPORTED_AUDIO_EXTENSIONS
+
+
+def is_supported_image_extension(path: str | Path) -> bool:
+    """Return True when file extension is one of supported image formats."""
+    file_path = _to_path(path)
+    return file_path.suffix.lower() in SUPPORTED_IMAGE_EXTENSIONS
