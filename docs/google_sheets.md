@@ -24,14 +24,13 @@
 - `scripts/import_questions.py`
 - `scripts/preload_question_audio.py`
 - `scripts/import_routes.py`
-- `scripts/import_all_content.py`
 
 Текущий статус:
 
 - `scripts/import_grammar.py` реализован для листов `grammar_topics` и `grammar_questions`;
 - `scripts/import_questions.py` реализован для листа `questions`;
 - `scripts/preload_question_audio.py` реализован для preload аудио вопросов в Telegram (`file_id` cache);
-- `scripts/import_routes.py` реализован как foundation-import для листов `routes`, `route_steps`, `route_news`, `route_question_blocks`, `route_questions` (без включения Routes UI).
+- `scripts/import_routes.py` реализован как foundation-import для листов `routes`, `route_steps`, `route_news`, `route_question_blocks`, `route_questions`.
 
 Запуск импорта грамматики:
 
@@ -43,6 +42,13 @@ python scripts/import_grammar.py
 
 ```bash
 python scripts/import_questions.py
+```
+
+Проверка и импорт Routes:
+
+```bash
+python scripts/import_routes.py --dry-run
+python scripts/import_routes.py --confirm-import
 ```
 
 Preload аудио после импорта вопросов:
