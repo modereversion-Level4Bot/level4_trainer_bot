@@ -148,6 +148,7 @@ async def render_main_menu(
         user_id=user_id,
         text=main_menu_text(language, context=context),
         reply_markup=build_main_menu_keyboard(language, context=context),
+        parse_mode="HTML",
     )
 
 

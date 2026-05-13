@@ -16,48 +16,24 @@ def normalize_language(language: str | None) -> Language:
     return "en"
 
 
-def _normalize_version(bot_version: str) -> str:
-    normalized = (bot_version or "").strip()
-    if not normalized:
-        return "0.0"
-    if normalized.lower().startswith("v"):
-        normalized = normalized[1:].strip()
-    return normalized or "0.0"
-
-
 def main_menu_text(language: str, context: MainMenuContext) -> str:
     """Build localized main menu text."""
     lang = normalize_language(language)
-    version = _normalize_version(context.bot_version)
 
     if lang == "ru":
-        text = (
-            "✈️ Level 4 Trainer\n\n"
-            "Тренажёр ICAO English для пилотов.\n\n"
-            "Грамматика, экзаменационные вопросы и маршруты в формате пилот-диспетчер\n\n"
-            "Ваш текущий прогресс:\n\n"
-            f"📘 Грамматика — изучено {context.grammar_completed} из {context.grammar_total}\n"
-            f"🎙 Вопросы — пройдено {context.questions_completed} из {context.questions_total}\n"
-            f"🛫 Маршруты — пройдено {context.routes_completed} из {context.routes_total}\n"
+        _ = context
+        return (
+            "📱 <b>Level 4 Trainer</b>\n\n"
+            "Интерактивный тренажёр для подготовки пилотов к экзамену по английскому языку SELCAL.\n\n"
+            "<b>Выберите раздел для изучения:</b>"
         )
-        if context.is_admin:
-            text += f"\n🟢 Работает\n🎮 v {version}\n"
-        text += "\nВыберите раздел для тренировки:"
-        return text
 
-    text = (
-        "✈️ Level 4 Trainer\n\n"
-        "ICAO English trainer for pilots.\n\n"
-        "Grammar, exam questions, and pilot-controller routes.\n\n"
-        "Your current progress:\n\n"
-        f"📘 Grammar — studied {context.grammar_completed} of {context.grammar_total}\n"
-        f"🎙 Questions — completed {context.questions_completed} of {context.questions_total}\n"
-        f"🛫 Routes — completed {context.routes_completed} of {context.routes_total}\n"
+    _ = context
+    return (
+        "📱 <b>Level 4 Trainer</b>\n\n"
+        "An interactive trainer for pilots preparing for the SELCAL English language exam.\n\n"
+        "<b>Choose a section to study:</b>"
     )
-    if context.is_admin:
-        text += f"\n🟢 Running\n🎮 v {version}\n"
-    text += "\nChoose a section to train:"
-    return text
 
 
 def grammar_button_text(language: str) -> str:

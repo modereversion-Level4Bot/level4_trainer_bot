@@ -102,25 +102,48 @@ def grammar_topics_keyboard(
             ]
         )
 
-    bottom_row: list[InlineKeyboardButton] = []
-    if total_pages > 1 and page > 1:
-        bottom_row.append(
-            InlineKeyboardButton(
-                text=back_button_text(language),
-                callback_data=f"{CB_GRAMMAR_LIST_PAGE_PREFIX}{page - 1}",
-            )
+    has_prev = total_pages > 1 and page > 1
+    has_next = total_pages > 1 and page < total_pages
+    if has_prev and has_next:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text=back_button_text(language),
+                    callback_data=f"{CB_GRAMMAR_LIST_PAGE_PREFIX}{page - 1}",
+                ),
+                InlineKeyboardButton(
+                    text=pagination_next_button_text(language),
+                    callback_data=f"{CB_GRAMMAR_LIST_PAGE_PREFIX}{page + 1}",
+                ),
+            ]
         )
-    bottom_row.append(
-        InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)
-    )
-    if total_pages > 1 and page < total_pages:
-        bottom_row.append(
-            InlineKeyboardButton(
-                text=pagination_next_button_text(language),
-                callback_data=f"{CB_GRAMMAR_LIST_PAGE_PREFIX}{page + 1}",
-            )
+        rows.append(
+            [InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)]
         )
-    rows.append(bottom_row)
+    elif has_prev:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text=back_button_text(language),
+                    callback_data=f"{CB_GRAMMAR_LIST_PAGE_PREFIX}{page - 1}",
+                ),
+                InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME),
+            ]
+        )
+    elif has_next:
+        rows.append(
+            [
+                InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME),
+                InlineKeyboardButton(
+                    text=pagination_next_button_text(language),
+                    callback_data=f"{CB_GRAMMAR_LIST_PAGE_PREFIX}{page + 1}",
+                ),
+            ]
+        )
+    else:
+        rows.append(
+            [InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)]
+        )
     return InlineKeyboardMarkup(rows)
 
 
@@ -147,25 +170,48 @@ def grammar_extra_topics_keyboard(
         [InlineKeyboardButton(to_grammar_button_text(language), callback_data=CB_GRAMMAR_LIST)]
     )
 
-    bottom_row: list[InlineKeyboardButton] = []
-    if total_pages > 1 and page > 1:
-        bottom_row.append(
-            InlineKeyboardButton(
-                text=back_button_text(language),
-                callback_data=f"{CB_GRAMMAR_EXTRA_LIST_PAGE_PREFIX}{page - 1}",
-            )
+    has_prev = total_pages > 1 and page > 1
+    has_next = total_pages > 1 and page < total_pages
+    if has_prev and has_next:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text=back_button_text(language),
+                    callback_data=f"{CB_GRAMMAR_EXTRA_LIST_PAGE_PREFIX}{page - 1}",
+                ),
+                InlineKeyboardButton(
+                    text=pagination_next_button_text(language),
+                    callback_data=f"{CB_GRAMMAR_EXTRA_LIST_PAGE_PREFIX}{page + 1}",
+                ),
+            ]
         )
-    bottom_row.append(
-        InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)
-    )
-    if total_pages > 1 and page < total_pages:
-        bottom_row.append(
-            InlineKeyboardButton(
-                text=pagination_next_button_text(language),
-                callback_data=f"{CB_GRAMMAR_EXTRA_LIST_PAGE_PREFIX}{page + 1}",
-            )
+        rows.append(
+            [InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)]
         )
-    rows.append(bottom_row)
+    elif has_prev:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    text=back_button_text(language),
+                    callback_data=f"{CB_GRAMMAR_EXTRA_LIST_PAGE_PREFIX}{page - 1}",
+                ),
+                InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME),
+            ]
+        )
+    elif has_next:
+        rows.append(
+            [
+                InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME),
+                InlineKeyboardButton(
+                    text=pagination_next_button_text(language),
+                    callback_data=f"{CB_GRAMMAR_EXTRA_LIST_PAGE_PREFIX}{page + 1}",
+                ),
+            ]
+        )
+    else:
+        rows.append(
+            [InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)]
+        )
     return InlineKeyboardMarkup(rows)
 
 
@@ -223,24 +269,58 @@ def grammar_topic_keyboard(
         and next_topic_page > 0
     )
 
-    navigation_row: list[InlineKeyboardButton] = []
-    if has_previous:
-        navigation_row.append(
-            InlineKeyboardButton(
-                previous_topic_button_text(language),
-                callback_data=f"{topic_prefix}{previous_topic_number}:{previous_topic_page}",
-            )
+    if not has_previous and has_next:
+        rows.append(
+            [
+                InlineKeyboardButton(list_text, callback_data=list_callback),
+                InlineKeyboardButton(
+                    text=next_topic_button_text(language),
+                    callback_data=f"{topic_prefix}{next_topic_number}:{next_topic_page}",
+                ),
+            ]
         )
-    navigation_row.append(InlineKeyboardButton(list_text, callback_data=list_callback))
-    if has_next:
-        navigation_row.append(
-            InlineKeyboardButton(
-                text="➡️",
-                callback_data=f"{topic_prefix}{next_topic_number}:{next_topic_page}",
-            )
+        rows.append(
+            [InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)]
         )
+        return InlineKeyboardMarkup(rows)
 
-    rows.append(navigation_row)
+    if has_previous and has_next:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    previous_topic_button_text(language),
+                    callback_data=f"{topic_prefix}{previous_topic_number}:{previous_topic_page}",
+                ),
+                InlineKeyboardButton(
+                    text=next_topic_button_text(language),
+                    callback_data=f"{topic_prefix}{next_topic_number}:{next_topic_page}",
+                ),
+            ]
+        )
+        rows.append(
+            [
+                InlineKeyboardButton(list_text, callback_data=list_callback),
+                InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME),
+            ]
+        )
+        return InlineKeyboardMarkup(rows)
+
+    if has_previous and not has_next:
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    previous_topic_button_text(language),
+                    callback_data=f"{topic_prefix}{previous_topic_number}:{previous_topic_page}",
+                ),
+                InlineKeyboardButton(list_text, callback_data=list_callback),
+            ]
+        )
+        rows.append(
+            [InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)]
+        )
+        return InlineKeyboardMarkup(rows)
+
+    rows.append([InlineKeyboardButton(list_text, callback_data=list_callback)])
     rows.append([InlineKeyboardButton(main_menu_button_text(language), callback_data=CB_GRAMMAR_HOME)])
     return InlineKeyboardMarkup(rows)
 

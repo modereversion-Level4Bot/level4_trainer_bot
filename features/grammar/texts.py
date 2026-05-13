@@ -23,25 +23,19 @@ def grammar_list_text(
     total_pages: int = 1,
 ) -> str:
     if normalize_language(language) == "ru":
-        text = (
+        return (
             "📘 <b>Грамматика</b>\n\n"
-            "Короткие и понятные темы, которые помогут увереннее отвечать на экзаменационные вопросы.\n\n"
-            f"📈 Прогресс <b>{completed} из {total}</b>\n"
+            "Основные темы и тренировки к ним, которые помогают освоить и закрепить базовые грамматические навыки.\n\n"
+            f"📈 Изучено <b>{completed}</b> из <b>{total}</b>\n\n"
+            "<b>Выберите тему для изучения:</b>"
         )
-        if total_pages > 1:
-            text += f"\n📄 Страница <b>{page} из {total_pages}</b>\n"
-        text += "\nВыберите тему:"
-        return text
 
-    text = (
+    return (
         "📘 <b>Grammar</b>\n\n"
-        "Short and clear grammar topics to help you answer exam questions more confidently.\n\n"
-        f"📈 Progress <b>{completed} of {total}</b>\n"
+        "Core topics and related exercises that help you build and reinforce essential grammar skills.\n\n"
+        f"📈 Studied <b>{completed}</b> of <b>{total}</b>\n\n"
+        "<b>Choose a topic to study:</b>"
     )
-    if total_pages > 1:
-        text += f"\n📄 Page <b>{page} of {total_pages}</b>\n"
-    text += "\nChoose a topic:"
-    return text
 
 
 def grammar_no_topics_text(language: str) -> str:
@@ -63,23 +57,17 @@ def extra_materials_text(
     total_pages: int = 1,
 ) -> str:
     if normalize_language(language) == "ru":
-        text = (
+        return (
             "📎 <b>Дополнительные материалы</b>\n\n"
-            "Эти темы помогут повторить полезные правила, но не входят в основной прогресс грамматики.\n"
+            "Дополнительные темы и тренировки к ним, которые помогают освоить и закрепить базовые грамматические навыки.\n\n"
+            "<b>Выберите тему для изучения:</b>"
         )
-        if total_pages > 1:
-            text += f"\n📄 Страница <b>{page} из {total_pages}</b>\n"
-        text += "\nВыберите тему:"
-        return text
 
-    text = (
+    return (
         "📎 <b>Additional materials</b>\n\n"
-        "These topics help you review useful rules, but they are not included in the main grammar progress.\n"
+        "Additional topics and related exercises that help you build and reinforce essential grammar skills.\n\n"
+        "<b>Choose a topic to study:</b>"
     )
-    if total_pages > 1:
-        text += f"\n📄 Page <b>{page} of {total_pages}</b>\n"
-    text += "\nChoose a topic:"
-    return text
 
 
 def topic_text(language: str, *, title: str, simple_explanation: str) -> str:
@@ -111,52 +99,56 @@ def start_training_button_text(language: str) -> str:
 
 def extra_materials_button_text(language: str) -> str:
     if normalize_language(language) == "ru":
-        return "📎 Дополнительно"
-    return "📎 Additional"
+        return "📎 Дополнительные материалы"
+    return "📎 Additional materials"
 
 
 def back_button_text(language: str) -> str:
-    _ = language
-    return "◀️"
+    if normalize_language(language) == "ru":
+        return "◀️ Назад"
+    return "◀️ Back"
 
 
 def pagination_next_button_text(language: str) -> str:
-    _ = language
-    return "▶️"
+    if normalize_language(language) == "ru":
+        return "Дальше ▶️"
+    return "Next ▶️"
 
 
 def to_grammar_button_text(language: str) -> str:
     if normalize_language(language) == "ru":
-        return "⬅️ К грамматике"
-    return "⬅️ To Grammar"
+        return "📘 Назад в грамматику"
+    return "📘 Back to Grammar"
 
 
 def topic_list_button_text(language: str) -> str:
     if normalize_language(language) == "ru":
-        return "📁 Темы"
-    return "📁 Topics"
+        return "📂 К списку тем"
+    return "📂 Topic list"
 
 
 def back_to_topic_button_text(language: str) -> str:
     if normalize_language(language) == "ru":
-        return "⬅️ К теме"
-    return "⬅️ To topic"
+        return "⤵️ Назад к теме"
+    return "⤵️ Back to topic"
 
 
 def previous_topic_button_text(language: str) -> str:
-    _ = language
-    return "⬅️"
+    if normalize_language(language) == "ru":
+        return "◀️ Предыдущая"
+    return "◀️ Previous"
 
 
 def next_topic_button_text(language: str) -> str:
     if normalize_language(language) == "ru":
-        return "Следующая ➡️"
-    return "Next ➡️"
+        return "Следующая ▶️"
+    return "Next ▶️"
 
 
 def main_menu_button_text(language: str) -> str:
-    _ = language
-    return "🏠"
+    if normalize_language(language) == "ru":
+        return "🏠 В главное меню"
+    return "🏠 Main menu"
 
 
 def unavailable_alert(language: str) -> str:
@@ -237,23 +229,21 @@ def training_result_excellent_text(
         text = (
             "🎉 <b>Превосходно!</b>\n\n"
             "Вы безупречно освоили материал.\n\n"
-            "Результат:\n\n"
             f"✅ Правильных ответов: <b>{correct}</b>\n"
             f"❌ Ошибок: <b>{wrong}</b>"
         )
         if mark_applied:
-            text += "\n\nТема отмечена как изученная."
+            text += "\n\nТема добавлена в прогресс"
         return text
 
     text = (
         "🎉 <b>Excellent!</b>\n\n"
         "You have mastered the material perfectly.\n\n"
-        "Result:\n\n"
         f"✅ Correct answers: <b>{correct}</b>\n"
         f"❌ Mistakes: <b>{wrong}</b>"
     )
     if mark_applied:
-        text += "\n\nThe topic has been marked as studied."
+        text += "\n\nTopic added to progress"
     return text
 
 
@@ -270,23 +260,21 @@ def training_result_good_text(
         text = (
             "✅ <b>Хороший результат</b>\n\n"
             "Можно повторить тренировку или перейти к другим темам.\n\n"
-            "Результат:\n\n"
             f"✅ Правильных ответов: <b>{correct}</b>\n"
             f"❌ Ошибок: <b>{wrong}</b>"
         )
         if mark_applied:
-            text += "\n\nТема отмечена как изученная."
+            text += "\n\nТема добавлена в прогресс"
         return text
 
     text = (
         "✅ <b>Good result</b>\n\n"
         "You can repeat the training or continue with other topics.\n\n"
-        "Result:\n\n"
         f"✅ Correct answers: <b>{correct}</b>\n"
         f"❌ Mistakes: <b>{wrong}</b>"
     )
     if mark_applied:
-        text += "\n\nThe topic has been marked as studied."
+        text += "\n\nTopic added to progress"
     return text
 
 
@@ -302,14 +290,12 @@ def training_result_weak_text(
         return (
             "📘 <b>Стоит повторить материал</b>\n\n"
             "Ошибок получилось многовато. Лучше ещё раз вернуться к теме и пройти тренировку повторно.\n\n"
-            "Результат:\n\n"
             f"✅ Правильных ответов: <b>{correct}</b>\n"
             f"❌ Ошибок: <b>{wrong}</b>"
         )
     return (
         "📘 <b>It is better to review the material</b>\n\n"
         "There were quite a few mistakes. It is better to return to the topic and repeat the training.\n\n"
-        "Result:\n\n"
         f"✅ Correct answers: <b>{correct}</b>\n"
         f"❌ Mistakes: <b>{wrong}</b>"
     )
@@ -335,5 +321,5 @@ def review_topic_again_button_text(language: str) -> str:
 
 def training_topic_list_button_text(language: str) -> str:
     if normalize_language(language) == "ru":
-        return "📁 Темы"
-    return "📁 Topics"
+        return "📂 К списку тем"
+    return "📂 Topic list"
