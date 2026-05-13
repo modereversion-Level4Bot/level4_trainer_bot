@@ -12,10 +12,3 @@ class OnboardingState(IntEnum):
     PICK_TIMEZONE = 2
     COMPLETE = 3
 
-
-class AdminState(IntEnum):
-    """Reserved admin panel states."""
-
-    MAIN = 100
-    ADS = 101
-    ANNOUNCEMENTS = 102

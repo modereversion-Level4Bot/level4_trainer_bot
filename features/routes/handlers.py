@@ -50,7 +50,6 @@ from features.routes.handlers_parsers import (
 )
 from features.routes.service import (
     finish_route_questions,
-    is_routes_ui_enabled,
     move_route_step,
     move_route_question,
     open_route_news_from_briefing,
@@ -101,20 +100,6 @@ async def routes_callback_router(update: Update, context: ContextTypes.DEFAULT_T
         return
     user_id = int(user_row["id"])
     language = get_user_language_by_telegram_id(user.id)
-
-    if not is_routes_ui_enabled():
-        await safe_answer_callback(
-            query,
-            text=stale_routes_navigation_alert(language),
-            show_alert=True,
-        )
-        await routes_go_home(
-            bot=context.bot,
-            chat_id=chat.id,
-            user_id=user_id,
-            telegram_id=user.id,
-        )
-        return
 
     if callback_data == CB_ROUTES_HOME:
         await safe_answer_callback(query)

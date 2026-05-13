@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import random
 
 from telegram import Bot
@@ -63,11 +62,6 @@ from features.routes.service_interrupt import (
     show_route_interrupt_confirmation,
 )
 
-
-def is_routes_ui_enabled() -> bool:
-    """Feature-flag gate for routes UI in local/dev."""
-    raw = os.getenv("ENABLE_ROUTES_UI", "").strip().lower()
-    return raw in {"1", "true", "yes", "on"}
 
 
 async def show_route_news_list(

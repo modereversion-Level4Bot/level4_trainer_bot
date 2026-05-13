@@ -13,7 +13,7 @@ from features.main_menu.service import (
     get_user_row_by_telegram_id,
 )
 from features.main_menu.texts import todo_section_alert
-from features.routes.service import is_routes_ui_enabled, show_routes_list
+from features.routes.service import show_routes_list
 
 
 async def handle_main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -36,14 +36,6 @@ async def handle_main_menu_callback(update: Update, context: ContextTypes.DEFAUL
         return
 
     language = get_user_language_by_telegram_id(user.id)
-    if not is_routes_ui_enabled():
-        await safe_answer_callback(
-            query,
-            text=todo_section_alert(language),
-            show_alert=True,
-        )
-        return
-
     user_row = get_user_row_by_telegram_id(user.id)
     if user_row is None:
         await safe_answer_callback(query)

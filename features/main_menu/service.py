@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import sqlite3
-import os
 
 from telegram import Bot
 
@@ -67,10 +66,6 @@ def _is_admin(telegram_id: int) -> bool:
     return telegram_id in settings.admin_ids
 
 
-def _is_routes_ui_enabled() -> bool:
-    raw = os.getenv("ENABLE_ROUTES_UI", "").strip().lower()
-    return raw in {"1", "true", "yes", "on"}
-
 
 def get_user_row_by_telegram_id(telegram_id: int) -> sqlite3.Row | None:
     """Load user row joined with onboarding state by Telegram ID."""
@@ -100,7 +95,6 @@ def _bounded_progress(completed: int, total: int) -> int:
 
 def build_main_menu_context(user_id: int, telegram_id: int) -> MainMenuContext:
     """Build progress and visibility context for main menu rendering."""
-    routes_ui_enabled = _is_routes_ui_enabled()
     with get_connection() as conn:
         grammar_total = count_active_main_topics(conn)
         grammar_completed = count_studied_main_topics(conn, user_id=user_id)
@@ -122,7 +116,7 @@ def build_main_menu_context(user_id: int, telegram_id: int) -> MainMenuContext:
         routes_completed=routes_completed,
         has_grammar_content=grammar_total > 0,
         has_questions_content=questions_total > 0,
-        has_routes_content=routes_ui_enabled and routes_total > 0,
+        has_routes_content=routes_total > 0,
         is_admin=_is_admin(telegram_id),
         bot_version=get_settings().bot_version,
     )
